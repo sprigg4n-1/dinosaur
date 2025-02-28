@@ -12,6 +12,6 @@ FROM amazoncorretto:21
 # Set the working directory in the container
 WORKDIR /app
 # Copy the built JAR file from the previous stage to the container
-COPY --from=build ./app/target/course-0.0.1.jar .
+COPY --from=build ./app/target/dinosaur-0.0.1.jar .
 # Set the command to run the application
-CMD ["java", "-jar", "course-0.0.1.jar"]
+CMD ["java", "-jar", "dinosaur-0.0.1.jar"]
