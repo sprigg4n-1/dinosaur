@@ -1,6 +1,10 @@
 package com.dinoterra.dinosaur.dino.enums;
 
 public enum DinoDiet {
-    Herbivores,
-    Carnivores
+    Herbivores,     
+    Carnivores,      
+    Omnivores,       
+    Piscivores,      
+    Insectivores,   
+    FilterFeeders    
 }

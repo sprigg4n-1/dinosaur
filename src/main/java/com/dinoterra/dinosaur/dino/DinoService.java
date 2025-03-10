@@ -1,10 +1,17 @@
 package com.dinoterra.dinosaur.dino;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.dinoterra.dinosaur.dino.enums.DinoDiet;
+import com.dinoterra.dinosaur.dino.enums.DinoPeriod;
+import com.dinoterra.dinosaur.dino.enums.DinoType;
 import com.dinoterra.dinosaur.image.ImageRepository;
 import com.dinoterra.dinosaur.image.ImageResponse;
 import com.dinoterra.dinosaur.location.FoundLocationRepository;
@@ -39,18 +46,42 @@ public class DinoService {
         return mapToDinoRes(dino, images, locations);
     }
 
-    public List<DinoResponse> getAllDinos() {
-        List<Dino> dinos = dinoRepository.findAll();
+    public Page<DinoResponse> getAllDinos(Pageable pageable, String name, String type, String diet, String period, String placeLocation) {
+        DinoType dinoType = (type != null) ? DinoType.valueOf(type) : null;
+        DinoDiet dinoDiet = (diet != null) ? DinoDiet.valueOf(diet) : null;
+        DinoPeriod dinoPeriod = (period != null) ? DinoPeriod.valueOf(period) : null;
+
+        Specification<Dino> spec = DinoSpecification.filterBy(name, dinoType, dinoDiet, dinoPeriod, placeLocation);
+
     
-        return dinos.stream().map(dino -> {
+        return dinoRepository.findAll(spec, pageable).map(dino -> {
             List<ImageResponse> images = imageRepository.findByDino(dino)
                 .stream()
                 .map(image -> new ImageResponse(image.getId(), image.getImage(), image.getFileName(), dino.getId()))
                 .collect(Collectors.toList());
+
             List<FoundLocationResponse> locations = locationRepository.findByDino(dino)
                 .stream()
                 .map(location -> new FoundLocationResponse(location.getId(), location.getPlace(), location.getLatitude(), location.getLongitude(), dino.getId()))
-                .collect(Collectors.toList());   
+                .collect(Collectors.toList());
+
+            return mapToDinoRes(dino, images, locations);
+        });
+    }
+
+    public List<DinoResponse> getFiveRandomDinos() {
+        List<Dino> allDinos = dinoRepository.findAll();
+        Collections.shuffle(allDinos);
+        return allDinos.stream().limit(5).map(dino -> {
+            List<ImageResponse> images = imageRepository.findByDino(dino)
+                .stream()
+                .map(image -> new ImageResponse(image.getId(), image.getImage(), image.getFileName(), dino.getId()))
+                .collect(Collectors.toList());
+    
+            List<FoundLocationResponse> locations = locationRepository.findByDino(dino)
+                .stream()
+                .map(location -> new FoundLocationResponse(location.getId(), location.getPlace(), location.getLatitude(), location.getLongitude(), dino.getId()))
+                .collect(Collectors.toList());
     
             return mapToDinoRes(dino, images, locations);
         }).collect(Collectors.toList());
