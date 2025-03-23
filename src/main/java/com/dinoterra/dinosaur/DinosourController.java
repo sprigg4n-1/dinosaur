@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +41,7 @@ public class DinosourController {
     @PostMapping("/dinos")
     @ResponseStatus(HttpStatus.CREATED)
     public DinoResponse addDino(@RequestBody DinoRequest dinoRequest) {
-        return  dinoService.createDino(dinoRequest);
+        return dinoService.createDino(dinoRequest);
     }
 
     @PutMapping("/dinos/{id}")
@@ -55,14 +54,13 @@ public class DinosourController {
     @GetMapping("/dinos")
     @ResponseStatus(HttpStatus.OK)
     public Page<DinoResponse> getAllDinos(
-        @RequestParam(defaultValue = "0") int page,  
-        @RequestParam(defaultValue = "12") int size,         
-        @RequestParam(required = false) String name,
-        @RequestParam(required = false) String type,
-        @RequestParam(required = false) String diet,
-        @RequestParam(required = false) String period,
-        @RequestParam(required = false) String placeLocation)
-         {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String diet,
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) String placeLocation) {
         Pageable pageable = PageRequest.of(page, size);
         return dinoService.getAllDinos(pageable, name, type, diet, period, placeLocation);
     }
@@ -78,7 +76,7 @@ public class DinosourController {
     public DinoResponse getDino(@PathVariable Long id) {
         return dinoService.getDino(id);
     }
-    
+
     @DeleteMapping("/dinos/{id}")
     public String deleteDinoById(@PathVariable Long id) {
         dinoService.deleteDino(id);
@@ -95,8 +93,9 @@ public class DinosourController {
 
     @GetMapping("/locations")
     @ResponseStatus(HttpStatus.OK)
-    public List<FoundLocationResponse> getAllLocations() {
-        return locationService.getAllLocations();
+    public List<FoundLocationResponse> getAllLocations(@RequestParam(required = false) String place,
+            @RequestParam(required = false) String period) {
+        return locationService.getAllLocations(place, period);
     }
 
     @GetMapping("/locations/dino/{dinoId}")
@@ -118,7 +117,7 @@ public class DinosourController {
         imageService.saveImage(imageRequest);
         return "image successfully added";
     }
-    
+
     @GetMapping("/images/dino/{dinoId}")
     @ResponseStatus(HttpStatus.OK)
     public List<ImageResponse> getImagesByDinoId(@PathVariable Long dinoId) {

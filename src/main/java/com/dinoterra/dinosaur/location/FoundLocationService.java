@@ -2,10 +2,12 @@ package com.dinoterra.dinosaur.location;
 
 import java.util.List;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.dinoterra.dinosaur.dino.Dino;
 import com.dinoterra.dinosaur.dino.DinoRepository;
+import com.dinoterra.dinosaur.dino.enums.DinoPeriod;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +19,18 @@ public class FoundLocationService {
     private final FoundLocationRepository locationRepository;
     private final DinoRepository dinoRepository;
 
-    public List<FoundLocationResponse> getAllLocations() {
-        List<DinoFoundLocation> locations = locationRepository.findAll();
+    public List<FoundLocationResponse> getAllLocations(String place, String period) {
+
+        DinoPeriod dinoPeriod = (period != null) ? DinoPeriod.valueOf(period) : null;
+        Specification<DinoFoundLocation> spec = FoundLocationSpecification.filterBy(place, dinoPeriod);
+
+        List<DinoFoundLocation> locations = locationRepository.findAll(spec);
         return locations.stream().map(this::mapToLocationRes).toList();
     }
 
     public List<FoundLocationResponse> getLocationsByDinoId(Long dinoId) {
         Dino dino = dinoRepository.findById(dinoId)
-            .orElseThrow(() -> new RuntimeException("Dino not found with ID " + dinoId));
+                .orElseThrow(() -> new RuntimeException("Dino not found with ID " + dinoId));
 
         List<DinoFoundLocation> locations = locationRepository.findByDino(dino);
 
@@ -58,7 +64,6 @@ public class FoundLocationService {
                 dinoLocation.getPlace(),
                 dinoLocation.getLatitude(),
                 dinoLocation.getLongitude(),
-                dinoLocation.getDino().getId()
-        );
+                dinoLocation.getDino().getId());
     }
 }
